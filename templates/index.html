@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧵 GenZ Thread Creator 🧵</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF4D4D;
+            --secondary: #FFB6C1;
+            --background: #FFF5F5;
+            --text: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .generate-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            margin: 0 auto;
+            font-weight: 600;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,77,77,0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .thread-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #FFF;
+            border-radius: 15px;
+            border: 2px solid var(--secondary);
+            position: relative;
+            display: none;
+        }
+
+        .thread-content {
+            white-space: pre-wrap;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading::after {
+            content: "⏳";
+            animation: loading 1s infinite;
+        }
+
+        @keyframes loading {
+            0% { content: "⏳"; }
+            33% { content: "⌛"; }
+            66% { content: "⏳"; }
+        }
+
+        .error {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🧵</span> GenZ Thread Creator <span class="emoji">🧵</span></h1>
+        
+        <button class="generate-btn" onclick="generateThread()">Tạo Thread Mới</button>
+        
+        <div class="loading" id="loading"></div>
+        <div class="error" id="error"></div>
+        
+        <div class="thread-container" id="threadContainer">
+            <button class="copy-btn" onclick="copyThread()">Copy</button>
+            <div class="thread-content" id="threadContent"></div>
+        </div>
+    </div>
+
+    <script>
+        async function generateThread() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const threadContainer = document.getElementById('threadContainer');
+            const threadContent = document.getElementById('threadContent');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            threadContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.thread) {
+                    threadContent.textContent = data.thread;
+                    threadContainer.style.display = 'block';
+                } else {
+                    throw new Error('Không thể tạo thread');
+                }
+            } catch (err) {
+                error.textContent = 'Có lỗi xảy ra: ' + err.message;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function copyThread() {
+            const threadContent = document.getElementById('threadContent');
+            navigator.clipboard.writeText(threadContent.textContent)
+                .then(() => {
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Đã copy!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Lỗi khi copy:', err);
+                });
+        }
+    </script>
+</body>
+</html> 
