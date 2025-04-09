@@ -1,31 +1,31 @@
 # 🧵 GenZ Thread Creator 🧵
 
-Ứng dụng web tạo thread kiểu GenZ tự động sử dụng Gemini API.
+An automatic web application to generate GenZ-style thread posts using Gemini API.
 
 ## Demo
 
-Truy cập ứng dụng tại: [https://nahvine.github.io/Generate_Paragraph_Threads/](https://nahvine.github.io/Generate_Paragraph_Threads/)
+Access the application at: [https://nahvine.github.io/Generate_Paragraph_Threads/](https://nahvine.github.io/Generate_Paragraph_Threads/)
 
-## Tính năng
+## Features
 
-- Tạo thread ngẫu nhiên với nhiều mood khác nhau (angry, cute, sad, casual)
-- Giao diện hiện đại, thân thiện với người dùng
-- Nút copy nhanh chóng
-- Hiệu ứng loading và thông báo lỗi
+- Generate random threads with different moods (angry, cute, sad, casual)
+- Modern, user-friendly interface
+- Quick copy button
+- Loading effects and error notifications
 
-## Sử dụng
+## Usage
 
-1. Truy cập [ứng dụng](https://nahvine.github.io/Generate_Paragraph_Threads/)
-2. Nhấn nút "Tạo Thread Mới" để tạo một thread ngẫu nhiên
-3. Đợi trong giây lát để thread được tạo
-4. Nhấn nút "Copy" để sao chép nội dung thread
+1. Visit the [application](https://nahvine.github.io/Generate_Paragraph_Threads/)
+2. Click the "Tạo Thread Mới" button to generate a new random thread
+3. Wait a moment for the thread to be created
+4. Click the "Copy" button to copy the thread content
 
-## Công nghệ sử dụng
+## Technologies Used
 
 - Frontend: HTML, CSS, JavaScript
 - API: Gemini API
 - Font: Inter
 
-## Giấy phép
+## License
 
 MIT License 
