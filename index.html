@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧵 GenZ Thread Creator 🧵</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF4D4D;
+            --secondary: #FFB6C1;
+            --background: #FFF5F5;
+            --text: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .generate-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            margin: 0 auto;
+            font-weight: 600;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,77,77,0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .thread-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #FFF;
+            border-radius: 15px;
+            border: 2px solid var(--secondary);
+            position: relative;
+            display: none;
+        }
+
+        .thread-content {
+            white-space: pre-wrap;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading::after {
+            content: "⏳";
+            animation: loading 1s infinite;
+        }
+
+        @keyframes loading {
+            0% { content: "⏳"; }
+            33% { content: "⌛"; }
+            66% { content: "⏳"; }
+        }
+
+        .error {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🧵</span> GenZ Thread Creator <span class="emoji">🧵</span></h1>
+        
+        <button class="generate-btn" onclick="generateThread()">Tạo Thread Mới</button>
+        
+        <div class="loading" id="loading"></div>
+        <div class="error" id="error"></div>
+        
+        <div class="thread-container" id="threadContainer">
+            <button class="copy-btn" onclick="copyThread()">Copy</button>
+            <div class="thread-content" id="threadContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyBQJfAFkGRsv_jhL0FP1Sf4eXVfNhoo7Ec";
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+        const SHORT_WORDS = {
+            "angry": {
+                "tôi": "t", "tao": "t", "mày": "m", "bạn": "m", "đã": "đ", "không": "ko",
+                "cũng": "cx", "với": "vs", "gì": "j", "như thế nào": "ntn", "đi": "điếc",
+                "luôn": "lun", "biết": "bít", "rồi": "ròi", "muốn": "mún"
+            },
+            "cute": {
+                "tôi": "mình", "bạn": "bồ", "không": "hông", "rồi": "ròi", "vậy": "zậy",
+                "mà": "màaa", "được": "đc", "cũng": "cux", "nhé": "nhaa", "thôi": "thui",
+                "luôn": "luonn", "ơi": "oizz", "iu": "iêu", "yêu": "iêu"
+            },
+            "sad": {
+                "tôi": "t", "bạn": "m", "đã": "đ", "không": "ko", "cũng": "cx", "với": "vs",
+                "gì": "j", "như thế nào": "ntn", "buồn": "bùn", "thì": "thỳ", "luôn": "lun",
+                "được": "đc", "rồi": "ròi", "là": "là", "có": "cóa"
+            },
+            "casual": {
+                "tôi": "t", "bạn": "m", "đã": "đ", "không": "k", "cũng": "cx", "với": "vs",
+                "gì": "j", "như thế nào": "ntn", "người yêu cũ": "nyc", "gia đình": "gđ",
+                "rồi": "ròi", "ok": "okee", "vậy": "z", "làm sao": "lsao", "luôn": "lun"
+            }
+        };
+
+        const VIBE_OPTIONS = [
+            ["than vãn chuyện học hành, crush, deadline dí tới cổ", "sad"],
+            ["1 pha xử lý đi vào lòng đất với người yêu cũ", "angry"],
+            ["câu chuyện đen đủi mà ngẫm lại vẫn thấy tức cười", "casual"],
+            ["drama đời thường mà không ai ngờ tới", "angry"],
+            ["chuyện xàm xí nhưng lại relatable vãi", "casual"],
+            ["quote nghe thấm nhưng vẫn giữ đúng chất GenZ", "sad"],
+            ["trà xanh level max và cái kết", "angry"],
+            ["tâm sự nửa đêm nhìn story nyc", "sad"],
+            ["mẩu chuyện dễ thương lấp lánh", "cute"]
+        ];
+
+        const ENDING_STYLES = [
+            "ừ, con chó đó là t",
+            "ai ngờ đâu kết quả lại thế...",
+            "mà hoá ra… t là đứa bị lừa",
+            "và t đã sai, rất sai luôn",
+            "và từ đó t không nhắn tin cho nó nữa",
+            "đm… thế là t mất 3tr vì con mèo =))",
+            "còn gì đau hơn là crush bạn thân chứ",
+            "hong tin đc luôn á...",
+            "ừ thì cũng đáng mà :))",
+            "và t chỉ biết ngồi cười zậy á"
+        ];
+
+        const OPENINGS = [
+            "Mọi người cho t hỏi chứ có ai từng...",
+            "Ủa có phải mỗi t bị vậy hông?",
+            "T kể chuyện này ra m đừng cười nhá...",
+            "Ngồi nhớ lại mà vẫn thấy ứa gan á 😤",
+            "Ai từng giống t thì giơ tay 😭",
+            "T không biết bắt đầu từ đâu nữa á...",
+            "Ủa alo??? Sao cuộc đời t như trò đùa zạ =)))"
+        ];
+
+        function randomChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function randomLength() {
+            return randomChoice([5, 6, 7, 8, 9]);
+        }
+
+        function getWordsByMood(mood) {
+            return SHORT_WORDS[mood] || SHORT_WORDS["casual"];
+        }
+
+        function buildPrompt() {
+            const [vibe, mood] = randomChoice(VIBE_OPTIONS);
+            const ending = randomChoice(ENDING_STYLES);
+            const opening = randomChoice(OPENINGS);
+            const shortWords = getWordsByMood(mood);
+            const length = randomLength();
+
+            return `
+Viết 1 đoạn thread kiểu GenZ đăng lên Threads, ngắn vừa thôi (~${length} câu), theo phong cách văn nói, không nghiêm túc, không gạch đầu dòng, không ngắt dòng. Viết liền mạch như kể chuyện cho bạn thân nghe.
+
+- Chủ đề: ${vibe}
+- Mở đầu bằng: "${opening}"
+- Kết thúc kiểu: "${ending}"
+
+Phong cách: ${mood.toUpperCase()} → dùng từ viết tắt tương ứng như:
+${Object.entries(shortWords).map(([k, v]) => `${k} → ${v}`).join(', ')}
+
+Hạn chế dùng từ nghiêm túc như "tôi", "bạn", thay bằng xưng hô đúng mood (t, m, tao, mày, hong,...). Ưu tiên kể chuyện như thật, có twist, có cảm xúc, dễ thương hoặc drama cũng đc.
+`;
+        }
+
+        async function generateThread() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const threadContainer = document.getElementById('threadContainer');
+            const threadContent = document.getElementById('threadContent');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            threadContainer.style.display = 'none';
+
+            try {
+                const prompt = buildPrompt();
+                const response = await fetch(GEMINI_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [{ text: prompt }]
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                    threadContent.textContent = data.candidates[0].content.parts[0].text.trim();
+                    threadContainer.style.display = 'block';
+                } else {
+                    throw new Error('Không thể tạo thread');
+                }
+            } catch (err) {
+                error.textContent = 'Có lỗi xảy ra: ' + err.message;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function copyThread() {
+            const threadContent = document.getElementById('threadContent');
+            navigator.clipboard.writeText(threadContent.textContent)
+                .then(() => {
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Đã copy!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Lỗi khi copy:', err);
+                });
+        }
+    </script>
+</body>
+</html> 
